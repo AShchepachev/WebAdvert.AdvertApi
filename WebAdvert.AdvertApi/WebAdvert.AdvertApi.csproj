@@ -2,16 +2,16 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <UserSecretsId>d8a6212e-6209-47a8-9e41-8ad00cb2a58d</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="6.0.0" />
     <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.5.4.31" />
+    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.5.1.45" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\WebAdvert.AdvertApi.Models\WebAdvert.AdvertApi.Models.csproj" />
+    <PackageReference Include="WebAdvert.AdvertApi.Models.Art.S" Version="1.0.2" />
   </ItemGroup>
 
 </Project>

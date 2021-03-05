@@ -5,6 +5,8 @@ using AutoMapper;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
 using System.Collections.Generic;
+using System.Net;
+using System.Linq;
 
 namespace WebAdvert.AdvertApi.Services
 {
@@ -20,7 +22,7 @@ namespace WebAdvert.AdvertApi.Services
         public async Task<string> AddAsync(AdvertModel model)
         {
             var dbModel = _mapper.Map<AdvertDbModel>(model);
-            dbModel.Id = new Guid().ToString();
+            dbModel.Id = Guid.NewGuid().ToString();
             dbModel.CreationDateTime = DateTime.UtcNow;
             dbModel.Status = AdvertStatus.Pending;
 
@@ -29,6 +31,13 @@ namespace WebAdvert.AdvertApi.Services
             await context.SaveAsync(dbModel);
 
             return dbModel.Id;
+        }
+
+        public async Task<bool> CheckHealthAsync()
+        {
+            using var client = new AmazonDynamoDBClient();
+            var table = await client.DescribeTableAsync("Adverts");
+            return string.Equals(table.Table.TableStatus, "active", StringComparison.OrdinalIgnoreCase);
         }
 
         public async Task ConfirmAsync(ConfirmAdvertModel model)
@@ -52,6 +61,29 @@ namespace WebAdvert.AdvertApi.Services
             {
                 await context.DeleteAsync(record);
             }
+        }
+
+        public async Task<List<AdvertModel>> GetAllAsync()
+        {
+            using var client = new AmazonDynamoDBClient();
+            using var context = new DynamoDBContext(client);
+            
+            var scanResult = await context.ScanAsync<AdvertDbModel>(new List<ScanCondition>()).GetNextSetAsync();
+            return scanResult.Select(item => _mapper.Map<AdvertModel>(item)).ToList();
+        }
+
+        public async Task<AdvertModel> GetByIdAsync(string id)
+        {
+            using var client = new AmazonDynamoDBClient();
+            using var context = new DynamoDBContext(client);
+                
+            var dbModel = await context.LoadAsync<AdvertDbModel>(id);
+            if (dbModel != null) 
+            { 
+                return _mapper.Map<AdvertModel>(dbModel); 
+            }
+
+            throw new KeyNotFoundException();
         }
     }
 }

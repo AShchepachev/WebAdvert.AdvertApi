@@ -6,6 +6,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using AutoMapper;
 using WebAdvert.AdvertApi.Services;
+using WebAdvert.AdvertApi.HealthChecks;
+using System;
 
 namespace WebAdvert.AdvertApi
 {
@@ -23,6 +25,8 @@ namespace WebAdvert.AdvertApi
         {
             services.AddAutoMapper();
             services.AddTransient<IAdvertStorageService, DynamoDBAdvertStorage>();
+
+            services.AddHealthChecks().AddCheck<StorageHealthCheck>("Storage", timeout: TimeSpan.FromMinutes(1));
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
@@ -42,8 +46,8 @@ namespace WebAdvert.AdvertApi
             }
 
             app.UseRouting();
-
             app.UseAuthorization();
+            app.UseHealthChecks("/health");
 
             app.UseEndpoints(endpoints =>
             {

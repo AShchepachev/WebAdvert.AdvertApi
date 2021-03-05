@@ -1,7 +1,14 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Authors>Art S</Authors>
+    <Company>Nope</Company>
+    <Product>WebAdvert.AdvertApi.Models Microservices Art</Product>
+    <PackageProjectUrl>https://github.com/AShchepachev/WebAdvert.AdvertApi</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/AShchepachev/WebAdvert.AdvertApi</RepositoryUrl>
+    <PackageId>WebAdvert.AdvertApi.Models.Art.S</PackageId>
+    <Version>1.0.2</Version>
   </PropertyGroup>
 
 </Project>
