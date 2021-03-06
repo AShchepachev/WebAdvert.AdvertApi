@@ -25,8 +25,14 @@ namespace WebAdvert.AdvertApi
         {
             services.AddAutoMapper();
             services.AddTransient<IAdvertStorageService, DynamoDBAdvertStorage>();
+            services.AddTransient<StorageHealthCheck>();
 
             services.AddHealthChecks().AddCheck<StorageHealthCheck>("Storage", timeout: TimeSpan.FromMinutes(1));
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllOrigin", policy => policy.WithOrigins("*").AllowAnyHeader());
+            });
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
@@ -48,6 +54,7 @@ namespace WebAdvert.AdvertApi
             app.UseRouting();
             app.UseAuthorization();
             app.UseHealthChecks("/health");
+            app.UseCors();
 
             app.UseEndpoints(endpoints =>
             {

@@ -1,5 +1,6 @@
 ﻿using AdvertApi.Models.Messages;
 using Amazon.SimpleNotificationService;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -70,6 +71,36 @@ namespace WebAdvert.AdvertApi.Controllers
             }
 
             return new OkResult();
+        }
+
+        [HttpGet]
+        [Route("{id}")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> Get(string id)
+        {
+            try
+            {
+                var advert = await _storageService.GetByIdAsync(id);
+                return new JsonResult(advert);
+            }
+            catch (KeyNotFoundException)
+            {
+                return new NotFoundResult();
+            }
+            catch (Exception)
+            {
+                return new StatusCodeResult(500);
+            }
+        }
+
+        [HttpGet]
+        [Route("all")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [EnableCors("AllOrigin")]
+        public async Task<IActionResult> All()
+        {
+            return new JsonResult(await _storageService.GetAllAsync());
         }
 
         private async Task RaiseAdvertConfirmedMessage(ConfirmAdvertModel model)
