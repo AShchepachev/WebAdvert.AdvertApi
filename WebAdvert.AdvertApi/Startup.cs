@@ -8,6 +8,11 @@ using AutoMapper;
 using WebAdvert.AdvertApi.Services;
 using WebAdvert.AdvertApi.HealthChecks;
 using System;
+using Amazon.Util;
+using Amazon.ServiceDiscovery;
+using Amazon.ServiceDiscovery.Model;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace WebAdvert.AdvertApi
 {
@@ -42,7 +47,7 @@ namespace WebAdvert.AdvertApi
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public async Task Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -56,10 +61,42 @@ namespace WebAdvert.AdvertApi
             app.UseHealthChecks("/health");
             app.UseCors();
 
+            await RegisterToCloudMap();
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
+        }
+
+        private async Task<string> RegisterToCloudMap()
+        {
+            // https://github.com/aussiearef/AWS.CloudMap.RegisterMe
+
+            const string serviceId = "srv-zujwx7satb3fup5b"; // aws cloudmap service id
+
+            var instanceId = EC2InstanceMetadata.InstanceId;
+
+            if (!string.IsNullOrEmpty(instanceId))
+            {
+                var ipv4 = EC2InstanceMetadata.PrivateIpAddress;
+                var client = new AmazonServiceDiscoveryClient();
+
+                var request = new RegisterInstanceRequest
+                {
+                    InstanceId = instanceId,
+                    ServiceId = serviceId,
+                    Attributes = new Dictionary<string, string>
+                    {
+                        { "AWS_INSTANCE_IPV4", ipv4 },
+                        { "AWS_INSTANCE_PORT", "80" } 
+                    }
+                };
+                var response = await client.RegisterInstanceAsync(request);
+                return response.OperationId;
+            }
+            
+            return "";
         }
     }
 }
